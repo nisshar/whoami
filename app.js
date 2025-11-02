@@ -309,3 +309,62 @@ function App() {
           ) : (
             <>
               <div className="flex flex-wrap gap-2 mb-4">
+                <p className="w-full text-purple-200 text-sm mb-2">💡 Quick starters:</p>
+                {suggestions.map((s, i) => (
+                  <button key={i} onClick={() => setMessage(s)} className="px-3 py-1.5 bg-white/10 rounded-full text-purple-200 text-sm">{s}</button>
+                ))}
+              </div>
+
+              <textarea
+                value={message}
+                onChange={(e) => setMessage(e.target.value)}
+                placeholder="Type your anonymous message here..."
+                className="w-full h-48 px-4 py-3 rounded-2xl bg-white/5 text-white placeholder-purple-300 resize-none"
+              />
+              <p className="text-purple-300 text-sm mt-2">{message.length} characters</p>
+
+              <button
+                onClick={handleSubmit}
+                disabled={!message.trim()}
+                className="w-full mt-4 py-3 rounded-2xl bg-gradient-to-r from-purple-500 to-pink-500 text-white font-semibold disabled:opacity-50"
+              >
+                <span className="inline-flex items-center gap-2 justify-center"><SendIcon /> Send Anonymously</span>
+              </button>
+
+              <div className="mt-4 p-3 bg-white/5 rounded-lg border border-white/10 flex items-start gap-3">
+                <LockIcon />
+                <p className="text-sm text-purple-200">Your message is anonymous. We only store simple device info for analytics (localStorage).</p>
+              </div>
+            </>
+          )}
+        </div>
+
+        <p className="text-center text-purple-300 mt-4 text-sm">🔐 Powered by Anonymous Messenger • Local demo (no server)</p>
+      </div>
+    </div>
+  );
+}
+
+// small UI helpers
+function StatCard({ label, value, Icon }) {
+  return (
+    <div className="bg-white/6 rounded-2xl p-5 border border-white/10">
+      <div className="flex items-center justify-between">
+        <div>
+          <p className="text-sm text-purple-300">{label}</p>
+          <div className="text-3xl font-bold text-white">{value}</div>
+        </div>
+        <div className="text-2xl text-purple-400"><Icon /></div>
+      </div>
+    </div>
+  );
+}
+
+// mount
+const rootEl = document.getElementById('root');
+// Use React 18 createRoot if available
+if (ReactDOM.createRoot) {
+  ReactDOM.createRoot(rootEl).render(<App />);
+} else {
+  ReactDOM.render(<App />, rootEl);
+}
