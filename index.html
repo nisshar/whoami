@@ -1,41 +1,39 @@
 <!DOCTYPE html>
 <html lang="en">
-  <head>
-    <meta charset="UTF-8" />
-    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
-    <title>Anonymous Messenger</title>
+<head>
+  <meta charset="utf-8" />
+  <meta name="viewport" content="width=device-width,initial-scale=1" />
+  <title>Anonymous Messenger</title>
+  <meta name="description" content="Send anonymous messages — static demo (localStorage)"/>
 
-    <!-- Tailwind CSS -->
-    <script src="https://cdn.tailwindcss.com"></script>
+  <!-- Tailwind (CDN) -->
+  <script src="https://cdn.tailwindcss.com"></script>
 
-    <!-- Meta / Theme -->
-    <meta name="description" content="Send and receive anonymous messages privately." />
-    <meta name="theme-color" content="#6b21a8" />
-  </head>
+  <!-- Optional page-theme color -->
+  <meta name="theme-color" content="#6b21a8" />
+</head>
+<body class="antialiased">
+  <div id="root" class="min-h-screen"></div>
 
-  <body class="bg-black">
-    <!-- React root -->
-    <div id="root"></div>
+  <!-- React (development builds - helpful when compiling JSX in-browser) -->
+  <script crossorigin src="https://unpkg.com/react@18/umd/react.development.js"></script>
+  <script crossorigin src="https://unpkg.com/react-dom@18/umd/react-dom.development.js"></script>
 
-    <!-- React (Development Build for JSX Compatibility) -->
-    <script crossorigin src="https://unpkg.com/react@18/umd/react.development.js"></script>
-    <script crossorigin src="https://unpkg.com/react-dom@18/umd/react-dom.development.js"></script>
+  <!-- Babel (compile JSX in browser) -->
+  <script src="https://unpkg.com/@babel/standalone/babel.min.js"></script>
 
-    <!-- Babel (Compiles JSX in Browser) -->
-    <script src="https://unpkg.com/@babel/standalone/babel.min.js"></script>
+  <!-- Lucide React UMD (icons as React components) -->
+  <script src="https://unpkg.com/lucide-react@latest/dist/lucide-react.umd.js"></script>
 
-    <!-- Lucide Icons -->
-    <script src="https://unpkg.com/lucide@latest"></script>
+  <!-- App JS (JSX compiled by Babel) -->
+  <!-- Use a relative path so GitHub Pages finds it when index.html is at repo root. -->
+  <script type="text/babel" src="app.js"></script>
 
-    <!-- Your React App -->
-    <!-- 👇 IMPORTANT: path must match your repo name -->
-    <script type="text/babel" src="/whoami/app.js"></script>
-
-    <!-- Optional: Error notice if Babel fails -->
-    <noscript>
-      <div style="text-align:center; color:white; padding:20px; font-family:sans-serif;">
-        ⚠️ Please enable JavaScript to use Anonymous Messenger.
-      </div>
-    </noscript>
-  </body>
+  <!-- Fallback message for users with JS disabled -->
+  <noscript>
+    <div class="p-6 text-center bg-red-900 text-white">
+      This app requires JavaScript. Please enable JavaScript to continue.
+    </div>
+  </noscript>
+</body>
 </html>
