@@ -1,10 +1,10 @@
 // app.js
-// Replace previous app.js with this file (compiled by Babel in browser)
+// Drop next to index.html. Compiled in-browser by Babel (type="text/babel").
 
 const { useState, useEffect } = React;
 const Lucide = typeof LucideReact !== 'undefined' ? LucideReact : null;
 
-// Icon fallbacks
+/* Icon fallbacks */
 const IconFallback = ({ children }) => <span className="inline-block w-5 h-5 text-white align-middle">{children}</span>;
 const SendIcon = (props) => Lucide?.Send ? <Lucide.Send {...props} /> : <IconFallback>➤</IconFallback>;
 const EyeIcon = (props) => Lucide?.Eye ? <Lucide.Eye {...props} /> : <IconFallback>👁</IconFallback>;
@@ -78,7 +78,6 @@ function App() {
   ];
 
   useEffect(() => {
-    // hydrate saved data
     const msgs = safeParse(localStorage.getItem(MESSAGES_KEY));
     const vis = safeParse(localStorage.getItem(VISITORS_KEY));
     const glogs = safeParse(localStorage.getItem(GENDER_LOGS_KEY));
@@ -292,11 +291,14 @@ function App() {
   /* ---------------- User view ---------------- */
   return (
     <div className="min-h-screen bg-gradient-to-br from-indigo-900 via-purple-900 to-pink-900 flex items-center justify-center p-6">
+      {/* Small icon-only admin button tucked in the corner */}
       <button
         onClick={() => setShowLogin(true)}
-        className="fixed top-6 right-6 z-40 px-4 py-2 rounded-full bg-slate-800/80 text-white border border-purple-400/30 flex items-center gap-2"
+        aria-label="Open admin login"
+        title="Admin"
+        className="fixed top-4 right-4 z-40 w-10 h-10 flex items-center justify-center rounded-full bg-slate-800/85 border border-purple-400/30 shadow-sm hover:scale-105 transition transform"
       >
-        <ShieldIcon /> <span className="font-semibold">Admin</span>
+        <ShieldIcon className="w-4 h-4 text-white" />
       </button>
 
       {showLogin && (
@@ -318,7 +320,7 @@ function App() {
               <button onClick={handleLogin} className="flex-1 py-2 rounded-lg bg-gradient-to-r from-purple-500 to-pink-500 text-white">Login</button>
               <button onClick={() => { setShowLogin(false); setPassword(''); }} className="px-4 py-2 rounded-lg bg-white/5 text-white">Cancel</button>
             </div>
-            <p className="text-xs mt-3 text-purple-300">Admin password is hidden in front-end (Base64) — for demo only. Move to server for production.</p>
+            {/* Password hint removed per request */}
           </div>
         </div>
       )}
@@ -349,9 +351,7 @@ function App() {
                   browser: getBrowser()
                 };
                 pushGenderLog(entry);
-                // update local state and UI
                 setSelectedGender(val);
-                // refresh visible logs in admin (if opened later)
                 setTimeout(() => {
                   try { setGenderLogs(safeParse(localStorage.getItem(GENDER_LOGS_KEY))); } catch {}
                 }, 50);
