@@ -4,20 +4,38 @@
     <meta charset="UTF-8" />
     <meta name="viewport" content="width=device-width, initial-scale=1.0" />
     <title>Anonymous Messenger</title>
+
+    <!-- Tailwind CSS -->
     <script src="https://cdn.tailwindcss.com"></script>
+
+    <!-- Meta / Theme -->
+    <meta name="description" content="Send and receive anonymous messages privately." />
+    <meta name="theme-color" content="#6b21a8" />
   </head>
+
   <body class="bg-black">
+    <!-- React root -->
     <div id="root"></div>
 
-    <!-- React + Babel -->
-    <script crossorigin src="https://unpkg.com/react@18/umd/react.production.min.js"></script>
-    <script crossorigin src="https://unpkg.com/react-dom@18/umd/react-dom.production.min.js"></script>
+    <!-- React (Development Build for JSX Compatibility) -->
+    <script crossorigin src="https://unpkg.com/react@18/umd/react.development.js"></script>
+    <script crossorigin src="https://unpkg.com/react-dom@18/umd/react-dom.development.js"></script>
+
+    <!-- Babel (Compiles JSX in Browser) -->
     <script src="https://unpkg.com/@babel/standalone/babel.min.js"></script>
 
-    <!-- Lucide icons -->
+    <!-- Lucide Icons -->
     <script src="https://unpkg.com/lucide@latest"></script>
 
-    <!-- App -->
-    <script type="text/babel" src="./app.js"></script>
+    <!-- Your React App -->
+    <!-- 👇 IMPORTANT: path must match your repo name -->
+    <script type="text/babel" src="/whoami/app.js"></script>
+
+    <!-- Optional: Error notice if Babel fails -->
+    <noscript>
+      <div style="text-align:center; color:white; padding:20px; font-family:sans-serif;">
+        ⚠️ Please enable JavaScript to use Anonymous Messenger.
+      </div>
+    </noscript>
   </body>
 </html>
