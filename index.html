@@ -6,16 +6,15 @@
   <title>Anonymous Messenger</title>
   <meta name="description" content="Send anonymous messages — static demo (localStorage)"/>
 
-  <!-- Tailwind (CDN) -->
+  <!-- Tailwind CSS (CDN) -->
   <script src="https://cdn.tailwindcss.com"></script>
 
-  <!-- Optional page-theme color -->
   <meta name="theme-color" content="#6b21a8" />
 </head>
 <body class="antialiased">
   <div id="root" class="min-h-screen"></div>
 
-  <!-- React (development builds - helpful when compiling JSX in-browser) -->
+  <!-- React (development builds, helps with in-browser Babel compilation) -->
   <script crossorigin src="https://unpkg.com/react@18/umd/react.development.js"></script>
   <script crossorigin src="https://unpkg.com/react-dom@18/umd/react-dom.development.js"></script>
 
@@ -25,11 +24,9 @@
   <!-- Lucide React UMD (icons as React components) -->
   <script src="https://unpkg.com/lucide-react@latest/dist/lucide-react.umd.js"></script>
 
-  <!-- App JS (JSX compiled by Babel) -->
-  <!-- Use a relative path so GitHub Pages finds it when index.html is at repo root. -->
+  <!-- App JS (type="text/babel" so Babel transpiles JSX) -->
   <script type="text/babel" src="app.js"></script>
 
-  <!-- Fallback message for users with JS disabled -->
   <noscript>
     <div class="p-6 text-center bg-red-900 text-white">
       This app requires JavaScript. Please enable JavaScript to continue.
