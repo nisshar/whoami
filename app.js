@@ -1,39 +1,31 @@
-// app.js (drop next to index.html)
-// Compiled in-browser by Babel (type="text/babel")
+// app.js
+// Drop next to index.html. This file is compiled by Babel in-browser (type="text/babel").
 
 /* eslint-disable no-console */
 const { useState, useEffect, useRef } = React;
-
-// Safely get lucide react icons (global from UMD bundle)
 const Lucide = typeof LucideReact !== 'undefined' ? LucideReact : null;
 
-// Minimal fallback icons (small inline SVGs) if LucideReact fails for any reason
-const FallbackIcon = ({ children }) => (
-  <span className="inline-block w-5 h-5 text-white align-middle" aria-hidden>{children}</span>
-);
+// Fallback icons if LucideReact is not available
+const IconFallback = ({ children }) => <span className="inline-block w-5 h-5 text-white align-middle">{children}</span>;
+const SendIcon = (props) => Lucide?.Send ? <Lucide.Send {...props} /> : <IconFallback>➤</IconFallback>;
+const EyeIcon = (props) => Lucide?.Eye ? <Lucide.Eye {...props} /> : <IconFallback>👁</IconFallback>;
+const UsersIcon = (props) => Lucide?.Users ? <Lucide.Users {...props} /> : <IconFallback>👥</IconFallback>;
+const MsgIcon = (props) => Lucide?.MessageSquare ? <Lucide.MessageSquare {...props} /> : <IconFallback>✉️</IconFallback>;
+const LockIcon = (props) => Lucide?.Lock ? <Lucide.Lock {...props} /> : <IconFallback>🔒</IconFallback>;
+const ChartIcon = (props) => Lucide?.BarChart3 ? <Lucide.BarChart3 {...props} /> : <IconFallback>📊</IconFallback>;
+const ShieldIcon = (props) => Lucide?.Shield ? <Lucide.Shield {...props} /> : <IconFallback>🛡️</IconFallback>;
+const XIcon = (props) => Lucide?.X ? <Lucide.X {...props} /> : <IconFallback>✕</IconFallback>;
 
-const SendIcon = (props) => Lucide?.Send ? <Lucide.Send {...props} /> : <FallbackIcon>➤</FallbackIcon>;
-const EyeIcon = (props) => Lucide?.Eye ? <Lucide.Eye {...props} /> : <FallbackIcon>👁</FallbackIcon>;
-const UsersIcon = (props) => Lucide?.Users ? <Lucide.Users {...props} /> : <FallbackIcon>👥</FallbackIcon>;
-const MsgIcon = (props) => Lucide?.MessageSquare ? <Lucide.MessageSquare {...props} /> : <FallbackIcon>✉️</FallbackIcon>;
-const LockIcon = (props) => Lucide?.Lock ? <Lucide.Lock {...props} /> : <FallbackIcon>🔒</FallbackIcon>;
-const ChartIcon = (props) => Lucide?.BarChart3 ? <Lucide.BarChart3 {...props} /> : <FallbackIcon>📊</FallbackIcon>;
-const ShieldIcon = (props) => Lucide?.Shield ? <Lucide.Shield {...props} /> : <FallbackIcon>🛡️</FallbackIcon>;
-const XIcon = (props) => Lucide?.X ? <Lucide.X {...props} /> : <FallbackIcon>✕</FallbackIcon>;
-
-// Utilities
 const safeParse = (s) => {
-  try { return JSON.parse(s || '[]') } catch (e) { return [] }
+  try { return JSON.parse(s || '[]'); } catch { return []; }
 };
-
-const uid = (prefix='id') => `${prefix}_${Date.now()}_${Math.floor(Math.random()*100000)}`;
+const uid = (prefix = 'id') => `${prefix}_${Date.now()}_${Math.floor(Math.random()*100000)}`;
 
 const getDeviceType = (ua = navigator.userAgent) => {
   if (/mobile/i.test(ua)) return 'Mobile';
   if (/tablet|ipad/i.test(ua)) return 'Tablet';
   return 'Desktop';
 };
-
 const getBrowser = (ua = navigator.userAgent) => {
   if (ua.includes('Edg')) return 'Edge';
   if (ua.includes('Chrome') && !ua.includes('Edg')) return 'Chrome';
@@ -42,7 +34,17 @@ const getBrowser = (ua = navigator.userAgent) => {
   return 'Other';
 };
 
-// Main App
+/* ---------------- Profile storage helpers ---------------- */
+const PROFILE_KEY = 'anon_profile';
+const loadProfile = () => {
+  try { return JSON.parse(localStorage.getItem(PROFILE_KEY) || 'null') || null; } catch { return null; }
+};
+const saveProfile = (p) => {
+  try { localStorage.setItem(PROFILE_KEY, JSON.stringify(p)); } catch (e) { console.warn('profile save failed', e); }
+};
+const clearProfile = () => { try { localStorage.removeItem(PROFILE_KEY); } catch (e) {} };
+
+/* ---------------- App ---------------- */
 function App() {
   const [isAdmin, setIsAdmin] = useState(false);
   const [showLogin, setShowLogin] = useState(false);
@@ -54,6 +56,7 @@ function App() {
   const [messages, setMessages] = useState([]);
   const [visitors, setVisitors] = useState([]);
   const [stats, setStats] = useState({ total: 0, today: 0, messages: 0 });
+  const [profile, setProfile] = useState(loadProfile());
 
   const suggestions = [
     "I've always wanted to tell you...",
@@ -65,26 +68,25 @@ function App() {
     "If I could tell you one thing..."
   ];
 
-  // initial: capture visitor and hydrate local state
   useEffect(() => {
-    captureVisitor();
+    // hydrate messages & visitors and capture visitor
     const msgs = safeParse(localStorage.getItem('messages'));
     const vis = safeParse(localStorage.getItem('visitors'));
     setMessages(msgs);
     setVisitors(vis);
-    setStats(calculateStats(msgs, vis));
+    setStats(calcStats(msgs, vis));
+    captureVisitor();
   }, []);
 
-  // calculate stats
-  const calculateStats = (msgList = [], visList = []) => {
+  // recalc stats helper
+  const calcStats = (msgList = [], visList = []) => {
     const today = new Date().toDateString();
     const todayCount = visList.filter(v => {
-      try { return new Date(v.timestamp).toDateString() === today } catch { return false }
+      try { return new Date(v.timestamp).toDateString() === today; } catch { return false; }
     }).length;
     return { total: visList.length, today: todayCount, messages: msgList.length };
   };
 
-  // capture visitor details (localStorage)
   const captureVisitor = () => {
     try {
       const v = {
@@ -111,26 +113,25 @@ function App() {
     }
   };
 
-  // handle message submit
+  // Submit message (includes profile snapshot)
   const handleSubmit = () => {
-    if (!message.trim()) {
-      alert('Please enter a message');
-      return;
-    }
+    if (!message.trim()) { alert('Please enter a message'); return; }
+    const profileSnapshot = loadProfile(); // may be null
     const msg = {
       id: uid('msg'),
       text: message.trim(),
       timestamp: new Date().toISOString(),
       userAgent: navigator.userAgent,
       device: getDeviceType(),
-      browser: getBrowser()
+      browser: getBrowser(),
+      profile: profileSnapshot
     };
     try {
       const existing = safeParse(localStorage.getItem('messages'));
       existing.push(msg);
       localStorage.setItem('messages', JSON.stringify(existing));
       setMessages(existing);
-      setStats(calculateStats(existing, visitors));
+      setStats(calcStats(existing, visitors));
       setSubmitted(true);
       setMessage('');
       setTimeout(() => setSubmitted(false), 2000);
@@ -141,7 +142,7 @@ function App() {
     }
   };
 
-  // admin login (simple local password)
+  // Admin login (local quick password)
   const handleLogin = () => {
     if (password === 'admin123') {
       setIsAdmin(true);
@@ -153,7 +154,6 @@ function App() {
     alert('Incorrect password');
     setPassword('');
   };
-
   const loadAdminData = () => {
     setLoadingAdmin(true);
     try {
@@ -161,19 +161,14 @@ function App() {
       const visList = safeParse(localStorage.getItem('visitors'));
       setMessages(msgList);
       setVisitors(visList);
-      setStats(calculateStats(msgList, visList));
+      setStats(calcStats(msgList, visList));
     } catch (err) {
       console.error('Error loading admin data', err);
-    } finally {
-      setLoadingAdmin(false);
-    }
+    } finally { setLoadingAdmin(false); }
   };
+  const logoutAdmin = () => setIsAdmin(false);
 
-  const logoutAdmin = () => {
-    setIsAdmin(false);
-  };
-
-  // Admin view
+  /* ---------- Admin view ---------- */
   if (isAdmin) {
     return (
       <div className="min-h-screen bg-gradient-to-br from-slate-900 via-purple-900 to-slate-900 text-white p-6">
@@ -184,9 +179,7 @@ function App() {
               <p className="text-purple-300">Monitor visitors & messages</p>
             </div>
             <div className="flex items-center gap-3">
-              <button onClick={logoutAdmin} className="px-4 py-2 rounded-lg bg-red-600/20 hover:bg-red-600/30">
-                Logout
-              </button>
+              <button onClick={logoutAdmin} className="px-4 py-2 rounded-lg bg-red-600/20 hover:bg-red-600/30">Logout</button>
             </div>
           </div>
 
@@ -208,10 +201,17 @@ function App() {
                   <div className="space-y-4 max-h-96 overflow-y-auto">
                     {messages.slice().reverse().map(m => (
                       <div key={m.id} className="bg-white/3 p-4 rounded-lg border border-white/10">
-                        <p className="text-white mb-2">{m.text}</p>
-                        <div className="text-sm text-purple-300">
-                          📅 {new Date(m.timestamp).toLocaleString()} · {m.device} · {m.browser}
+                        <div className="flex items-center gap-3 mb-3">
+                          {m.profile?.emoji ? <div className="text-2xl">{m.profile.emoji}</div> : null}
+                          <div>
+                            <div className="text-sm text-purple-300">To: <span className="text-white font-semibold">{m.profile?.displayName || 'Someone'}</span></div>
+                            {m.profile?.interests?.length ? (
+                              <div className="text-xs text-purple-300">Likes: {m.profile.interests.join(', ')}</div>
+                            ) : null}
+                          </div>
                         </div>
+                        <p className="text-white mb-2">{m.text}</p>
+                        <div className="text-sm text-purple-300">📅 {new Date(m.timestamp).toLocaleString()} · {m.device} · {m.browser}</div>
                       </div>
                     ))}
                   </div>
@@ -258,7 +258,7 @@ function App() {
     );
   }
 
-  // User view
+  /* ---------------- User view ---------------- */
   return (
     <div className="min-h-screen bg-gradient-to-br from-indigo-900 via-purple-900 to-pink-900 flex items-center justify-center p-6">
       <button
@@ -300,6 +300,9 @@ function App() {
             <p className="text-purple-200">Share your thoughts freely and anonymously</p>
           </div>
 
+          {/* Profile Picker */}
+          <ProfilePicker profile={profile} setProfile={(p) => { setProfile(p); saveProfile(p); }} />
+
           {submitted ? (
             <div className="text-center py-10">
               <div className="inline-block p-4 bg-green-500/20 rounded-full mb-4"><SendIcon /></div>
@@ -314,6 +317,13 @@ function App() {
                   <button key={i} onClick={() => setMessage(s)} className="px-3 py-1.5 bg-white/10 rounded-full text-purple-200 text-sm">{s}</button>
                 ))}
               </div>
+
+              {/* Preview line showing personalization (if any) */}
+              {profile ? (
+                <div className="mb-3 text-sm text-purple-200">
+                  Sending {profile.displayName ? `to ${profile.displayName}` : 'anonymously'}{profile.interests?.length ? ` — likes ${profile.interests.slice(0,3).join(', ')}` : ''}.
+                </div>
+              ) : null}
 
               <textarea
                 value={message}
@@ -333,7 +343,7 @@ function App() {
 
               <div className="mt-4 p-3 bg-white/5 rounded-lg border border-white/10 flex items-start gap-3">
                 <LockIcon />
-                <p className="text-sm text-purple-200">Your message is anonymous. We only store simple device info for analytics (localStorage).</p>
+                <p className="text-sm text-purple-200">Optional profile is saved locally only. No personal information is required.</p>
               </div>
             </>
           )}
@@ -345,7 +355,116 @@ function App() {
   );
 }
 
-// small UI helpers
+/* ---------------- ProfilePicker component ---------------- */
+const defaultInterests = ['football','coding','desi food','music','reading','ambitious'];
+
+function ProfilePicker({ profile, setProfile }) {
+  const [open, setOpen] = useState(false);
+  const [draft, setDraft] = useState(profile || {
+    displayName: '',
+    gender: '',
+    interests: [],
+    emoji: ''
+  });
+
+  useEffect(() => setDraft(profile || { displayName:'', gender:'', interests:[], emoji:'' }), [profile]);
+
+  const toggleInterest = (tag) => {
+    setDraft(d => {
+      const found = d.interests.includes(tag);
+      return { ...d, interests: found ? d.interests.filter(t => t !== tag) : [...d.interests, tag] };
+    });
+  };
+
+  const addCustomInterest = () => {
+    const val = (prompt('Add interest (short):') || '').trim();
+    if (!val) return;
+    setDraft(d => ({ ...d, interests: Array.from(new Set([...d.interests, val])) }));
+  };
+
+  const handleSave = () => {
+    setProfile(draft);
+    saveProfile(draft);
+    setOpen(false);
+  };
+
+  const handleClear = () => {
+    clearProfile();
+    setProfile(null);
+    setDraft({ displayName:'', gender:'', interests:[], emoji:'' });
+    setOpen(false);
+  };
+
+  return (
+    <div className="mb-4">
+      <div className="flex items-center gap-3">
+        <button
+          onClick={() => setOpen(o => !o)}
+          className="px-3 py-1.5 bg-white/10 text-sm text-purple-200 rounded-full"
+          aria-expanded={open}
+        >
+          {profile?.emoji ? <span className="mr-2">{profile.emoji}</span> : null}
+          {profile?.displayName ? `To: ${profile.displayName}` : 'Add a profile (optional)'}
+        </button>
+
+        {profile ? (
+          <button onClick={() => { clearProfile(); setProfile(null); }} className="text-xs text-purple-300">Clear</button>
+        ) : null}
+      </div>
+
+      {open && (
+        <div className="mt-3 p-4 bg-white/5 rounded-lg border border-white/10">
+          <label className="block text-xs text-purple-300 mb-1">Display name (optional)</label>
+          <input value={draft.displayName} onChange={e => setDraft({ ...draft, displayName: e.target.value })}
+            placeholder="e.g. Nishant" className="w-full mb-3 px-3 py-2 rounded bg-white/6 text-white" />
+
+          <label className="block text-xs text-purple-300 mb-1">Gender (optional)</label>
+          <div className="flex gap-3 mb-3">
+            {['Male','Female','Other','Prefer not to say'].map(g => (
+              <label key={g} className="inline-flex items-center gap-2 text-sm">
+                <input
+                  type="radio"
+                  name="gender"
+                  checked={draft.gender === g}
+                  onChange={() => setDraft(d => ({ ...d, gender: g }))}
+                />
+                <span className="text-sm text-purple-200">{g}</span>
+              </label>
+            ))}
+          </div>
+
+          <label className="block text-xs text-purple-300 mb-1">Interests (tap to toggle)</label>
+          <div className="flex flex-wrap gap-2 mb-3">
+            {defaultInterests.map(tag => {
+              const selected = draft.interests.includes(tag);
+              return (
+                <button key={tag}
+                  onClick={() => toggleInterest(tag)}
+                  className={`px-2 py-1 rounded-full text-sm ${selected ? 'bg-purple-500 text-white' : 'bg-white/10 text-purple-200'}`}>
+                  {tag}
+                </button>
+              );
+            })}
+            <button onClick={addCustomInterest} className="px-2 py-1 rounded-full bg-white/10 text-sm text-purple-200">+ Add</button>
+          </div>
+
+          <label className="block text-xs text-purple-300 mb-1">Emoji (optional)</label>
+          <input value={draft.emoji} onChange={e => setDraft(d => ({ ...d, emoji: e.target.value }))} placeholder="🙂" className="px-3 py-2 rounded bg-white/6 text-white mb-3"/>
+
+          <div className="flex gap-3">
+            <button onClick={handleSave} className="px-4 py-2 rounded bg-gradient-to-r from-purple-500 to-pink-500 text-white">Save</button>
+            <button onClick={() => setOpen(false)} className="px-4 py-2 rounded bg-white/10 text-white">Cancel</button>
+            <button onClick={handleClear} className="ml-auto text-sm text-red-400">Clear saved</button>
+          </div>
+
+          <p className="text-xs text-purple-300 mt-3">Optional. Saved locally only in this browser.</p>
+        </div>
+      )}
+    </div>
+  );
+}
+
+/* ---------------- UI helpers ---------------- */
 function StatCard({ label, value, Icon }) {
   return (
     <div className="bg-white/6 rounded-2xl p-5 border border-white/10">
@@ -360,9 +479,8 @@ function StatCard({ label, value, Icon }) {
   );
 }
 
-// mount
+/* ---------------- mount ---------------- */
 const rootEl = document.getElementById('root');
-// Use React 18 createRoot if available
 if (ReactDOM.createRoot) {
   ReactDOM.createRoot(rootEl).render(<App />);
 } else {
